@@ -135,8 +135,14 @@
                     letter-spacing: -0.01em;
                 }
                 .tp-settings-subtitle {
-                    font-size: 13px;
-                    color: #b5bac1;
+                    font-size: 14px;
+                    font-weight: 600;
+                    color: #dee0fc;
+                    text-shadow: 0 0 10px rgba(88, 101, 242, 0.3);
+                    max-width: 280px;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
                 }
                 .tp-settings-close {
                     background: transparent;
@@ -240,36 +246,42 @@
                     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
                 }
                 
-                /* Select - Modern Style */
+                /* Select - Discord Style */
                 .tp-select-wrap {
                     position: relative;
                     display: inline-flex;
                 }
                 .tp-select {
                     appearance: none;
-                    background: #2f3136;
+                    background: linear-gradient(180deg, #2f3136 0%, #28292d 100%);
                     border: 1px solid #36393f;
-                    border-radius: 8px;
-                    padding: 10px 40px 10px 14px;
+                    border-radius: 6px;
+                    padding: 8px 36px 8px 12px;
                     font-size: 14px;
                     font-weight: 500;
                     color: #fff;
                     cursor: pointer;
                     outline: none;
-                    transition: all 0.2s ease;
-                    min-width: 140px;
+                    transition: all 0.15s ease;
+                    min-width: 120px;
+                    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset;
                 }
                 .tp-select:hover {
                     border-color: #5865f2;
-                    background: #36393f;
+                    background: linear-gradient(180deg, #36393f 0%, #2f3136 100%);
                 }
                 .tp-select:focus {
                     border-color: #5865f2;
                     box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.25);
                 }
+                .tp-select option {
+                    background: #2f3136;
+                    color: #fff;
+                    padding: 8px;
+                }
                 .tp-select-arrow {
                     position: absolute;
-                    right: 14px;
+                    right: 10px;
                     top: 50%;
                     transform: translateY(-50%);
                     pointer-events: none;
