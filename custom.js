@@ -1,5 +1,5 @@
 // ============================================
-// TranslatorPlus Legcord - v3.2
+// Translator SaintB Legcord - v3.2
 // Bugfix: Composer, Send, Toolbar buttons
 // ============================================
 
@@ -10,7 +10,7 @@
             const tpStyles = document.createElement("style");
             tpStyles.id = "translatorplus-styles";
             tpStyles.textContent = `
-                /* TranslatorPlus Icons */
+                /* Translator SaintB Icons */
                 .tp-icon-languages {
                     display: inline-flex;
                     align-items: center;
@@ -21,7 +21,7 @@
                     height: 16px;
                 }
 
-                /* Botones TranslatorPlus */
+                /* Botones Translator SaintB */
                 .tp-composer-btn, .tp-msg-translate-btn {
                     background: transparent;
                     border: none;
@@ -347,9 +347,9 @@
                 }
             `;
             (document.head || document.documentElement).appendChild(tpStyles);
-            console.log("[TranslatorPlus] CSS inyectado correctamente");
+            console.log("[Translator SaintB] CSS inyectado correctamente");
         } catch(e) {
-            console.error("[TranslatorPlus] Error al inyectar CSS:", e.message);
+            console.error("[Translator SaintB] Error al inyectar CSS:", e.message);
         }
     }
 
@@ -360,7 +360,7 @@
         document.addEventListener('DOMContentLoaded', injectStyles);
     }
 
-    console.log("[TranslatorPlus] Iniciando v3.2...");
+    console.log("[Translator SaintB] Iniciando v3.2...");
 
     // ==================== ESTADO ====================
     const state = {
@@ -397,7 +397,7 @@
 
     // ==================== LOGGING ====================
     function tpLog(action, msgId, data) {
-        const prefix = "[TranslatorPlus][" + action + "]";
+        const prefix = "[Translator SaintB][" + action + "]";
         if (msgId) {
             console.log(prefix, "id=" + msgId, typeof data === 'object' ? JSON.stringify(data) : data);
         } else {
@@ -519,7 +519,7 @@
                 callback();
             } else if (attempts >= maxAttempts) {
                 clearInterval(interval);
-                console.error("[TranslatorPlus] Vencord no cargó");
+                console.error("[Translator SaintB] Vencord no cargó");
             }
         }, 100);
     }
@@ -544,7 +544,7 @@
             }
             return null;
         } catch (err) {
-            console.error("[TranslatorPlus] Error translate:", err);
+            console.error("[Translator SaintB] Error translate:", err);
             return null;
         }
     }
@@ -723,10 +723,10 @@
         content.appendChild(sentSection);
 
         modal.appendChild(content);
-        console.log("TranslatorPlus: About to append modal to body. modal=", modal);
-        console.log("TranslatorPlus: modal content children=", content.children.length);
+        console.log("Translator SaintB: About to append modal to body. modal=", modal);
+        console.log("Translator SaintB: modal content children=", content.children.length);
         document.body.appendChild(modal);
-        console.log("TranslatorPlus: Modal should be visible now!");
+        console.log("Translator SaintB: Modal should be visible now!");
 
         modal.addEventListener("click", function(e) {
             if (e.target === modal) modal.remove();
@@ -1003,14 +1003,14 @@
         btn.addEventListener("click", function(e) {
             e.preventDefault();
             e.stopPropagation();
-            console.log("TranslatorPlus: COMPOSER BUTTON CLICKED");
+            console.log("Translator SaintB: COMPOSER BUTTON CLICKED");
             const channelId = getActiveChannelId();
-            console.log("TranslatorPlus: channelId=" + channelId + " path=" + window.location.pathname);
+            console.log("Translator SaintB: channelId=" + channelId + " path=" + window.location.pathname);
             if (channelId) {
-                console.log("TranslatorPlus: calling openSettingsModal");
+                console.log("Translator SaintB: calling openSettingsModal");
                 openSettingsModal(channelId);
             } else {
-                console.log("TranslatorPlus: no channelId");
+                console.log("Translator SaintB: no channelId");
             }
         }, true); // capture: true
 
@@ -1025,7 +1025,7 @@
 
         // Insertar como PRIMER HIJO del contenedor de botones derechos (.buttons__74017)
         buttonsContainer.prepend(btn);
-        console.log("TranslatorPlus: Button prepended to", buttonsContainer.className);
+        console.log("Translator SaintB: Button prepended to", buttonsContainer.className);
 
         // Marcar en WeakSet DESPUÉS de insertar
         initializedComposers.add(container);
@@ -1448,7 +1448,7 @@
         }
 
         MessageActions.sendMessage = patchedSend;
-        console.log("[TranslatorPlus] SendMessage parcheado!");
+        console.log("[Translator SaintB] SendMessage parcheado!");
     }
 
     // ==================== INCOMING: TRADUCCIÓN AUTOMÁTICA ====================
@@ -1525,7 +1525,7 @@
                 translateAllVisible();
             }
         });
-        console.log("[TranslatorPlus] Keybind: Ctrl+Shift+T = Traducir todo lo visible");
+        console.log("[Translator SaintB] Keybind: Ctrl+Shift+T = Traducir todo lo visible");
     }
 
     // ==================== MESSAGE OBSERVER ====================
@@ -1827,7 +1827,7 @@
 
     // ==================== INICIALIZACIÓN ====================
     function init() {
-        console.log("[TranslatorPlus] Plugin iniciado!");
+        console.log("[Translator SaintB] Plugin iniciado!");
 
         // Cargar settings persistidos desde DataStore
         loadChannelSettings();
@@ -1865,7 +1865,7 @@
 
     // ==================== INICIO ====================
     waitForVencord(function() {
-        console.log("[TranslatorPlus] FluxDispatcher encontrado!");
+        console.log("[Translator SaintB] FluxDispatcher encontrado!");
         init();
     });
 

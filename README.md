@@ -1,121 +1,121 @@
-# TranslatorPlus for Legcord
+# Translator SaintB for Legcord
 
-Plugin de traducción para Legcord con interfaz visual mejorada.
+Translation plugin for Legcord with improved visual interface.
 
-## Características
+## Features
 
-- **Traducción de mensajes recibidos**: Hover sobre un mensaje → click en botón "A文"
-- **Traducción de mensajes enviados**: Con configuración activada
-- **Configuración por canal**: Cada canal puede tener su propio par de idiomas
-- **UI mejorada**: Animaciones, estilos modernos con tema Discord
-- **Soporte para DMs**: Funciona también en mensajes directos
+- **Received message translation**: Hover over a message → click "A文" button
+- **Sent message translation**: With configuration enabled
+- **Per-channel configuration**: Each channel can have its own language pair
+- **Improved UI**: Animations, modern styles with Discord theme
+- **DMs support**: Also works in direct messages
 
-## Requisitos
+## Requirements
 
-- Legcord instalado ([descargar](https://legcord.app/download))
-- Acceso al archivo de configuración de Legcord
+- Legcord installed ([download](https://legcord.app/download))
+- Access to Legcord configuration file
 
-## Instalación
+## Installation
 
-### Opción 1: Instalación automática (Linux/macOS)
+### Option 1: Automatic installation (Linux/macOS)
 
-Abre una terminal y ejecuta estos comandos uno por uno:
+Open a terminal and run these commands one by one:
 
 ```bash
-# 1. Crear carpeta de configuración si no existe
+# 1. Create config folder if it doesn't exist
 mkdir -p ~/.config/legcord
 
-# 2. Copiar el plugin a la carpeta de Legcord
+# 2. Copy the plugin to Legcord folder
 cp custom.js ~/.config/legcord/custom.js
 
-# 3. Agregar la ruta al archivo de configuración de Legcord
-#    (necesitas editar ~/.config/legcord/storage/settings.json manualmente)
+# 3. Add the path to Legcord configuration file
+#    (you need to edit ~/.config/legcord/storage/settings.json manually)
 ```
 
-### Opción 2: Instalación manual
+### Option 2: Manual installation
 
-1. **Copia el archivo `custom.js`** a tu carpeta de configuración de Legcord:
+1. **Copy the `custom.js` file** to your Legcord configuration folder:
 
-| Sistema Operativo | Ruta |
-|-------------------|------|
+| Operating System | Path |
+|-----------------|------|
 | **Linux** | `~/.config/legcord/custom.js` |
 | **macOS** | `~/Library/Application Support/legcord/custom.js` |
 | **Windows** | `%APPDATA%\legcord\custom.js` |
 
-2. **Edita `settings.json`**:
+2. **Edit `settings.json`**:
    - Linux: `~/.config/legcord/storage/settings.json`
    - macOS: `~/Library/Application Support/legcord/storage/settings.json`
    - Windows: `%APPDATA%\legcord\storage\settings.json`
 
-3. **Agrega esta línea** dentro del JSON (si ya existe `customJsBundle`, modifícala):
+3. **Add this line** inside the JSON (if `customJsBundle` already exists, modify it):
 
 ```json
 {
     "windowStyle": "native",
     "channel": "stable",
-    "customJsBundle": "/tu/ruta/a/custom.js",
-    // ... el resto de tu configuración
+    "customJsBundle": "/your/path/to/custom.js",
+    // ... rest of your configuration
 }
 ```
 
-4. **Guarda el archivo** y reinicia Legcord
+4. **Save the file** and restart Legcord
 
-### ¿Qué hace la instalación automática?
+### What does automatic installation do?
 
-Si elegiste la Opción 1, estos son los comandos exactos que se ejecutan:
+If you chose Option 1, these are the exact commands that run:
 
 ```bash
-mkdir -p ~/.config/legcord           # Crea la carpeta de configuración
-cp custom.js ~/.config/legcord/      # Copia el plugin
+mkdir -p ~/.config/legcord           # Creates the config folder
+cp custom.js ~/.config/legcord/      # Copies the plugin
 ```
 
-Puedes verificar cada paso antes de ejecutarlo. El script no modifica nada fuera de Legcord.
+You can verify each step before running it. The script doesn't modify anything outside of Legcord.
 
-## Uso
+## Usage
 
-### Traducir mensajes recibidos
+### Translate received messages
 
-1. Pase el cursor sobre un mensaje
-2. Aparecerá un botón "A文" en la barra de acciones
-3. Click en el botón para traducir
+1. Hover over a message
+2. An "A文" button will appear in the action bar
+3. Click the button to translate
 
-### Configuración por canal
+### Per-channel configuration
 
-1. Busca el botón "A文" en el compositor (junto al botón de emojis)
-2. Click en él para abrir la configuración del canal
-3. Ajusta los idiomas de entrada y salida
+1. Find the "A文" button in the composer (next to the emoji button)
+2. Click it to open channel settings
+3. Adjust input and output languages
 
-### Configuraciones disponibles
+### Available settings
 
-- **Traducción automática de recibidos**: Traduce mensajes al recibirlos
-- **Traducción de enviados**: Traduce antes de enviar
-- **Idioma de salida**: Idioma objetivo para la traducción
+- **Auto translate received**: Translate messages upon receiving
+- **Translate sent**: Translate before sending
+- **Output language**: Target language for translation
 
-## Solución de problemas
+## Troubleshooting
 
-### El botón no aparece
+### Button doesn't appear
 
-1. Verifica que `customJsBundle` apunte correctamente al archivo
-2. Asegúrate de que el archivo `custom.js` no tenga errores de sintaxis
-3. Revisa la consola de Legcord (Ctrl+Shift+I) para errores
+1. Verify that `customJsBundle` points correctly to the file
+2. Make sure the `custom.js` file has no syntax errors
+3. Check Legcord console (Ctrl+Shift+I) for errors
 
 ### Error "Cannot read properties of null"
 
-El plugin necesita que el DOM de Discord esté completamente cargado. Espera unos segundos después de abrir Legcord.
+The plugin needs Discord's DOM to be fully loaded. Wait a few seconds after opening Legcord.
 
-## Desinstalación
+## Uninstallation
 
-1. Elimina el archivo `custom.js`
-2. Edita `settings.json` y elimina o comenta la línea `"customJsBundle"`
-3. Reinicia Legcord
+1. Delete the `custom.js` file
+2. Edit `settings.json` and remove or comment out the `"customJsBundle"` line
+3. Restart Legcord
 
-## Seguridad
+## Security
 
-Este plugin:
-- **NO** envía tu información a ningún servidor externo excepto Google Translate API
-- **NO** almacena tokens o credenciales
-- **NO** modifica el contenido de los mensajes de otros usuarios
+This plugin:
+- **Does NOT** send your information to any external server except Google Translate API
+- **Does NOT** store tokens or credentials
+- **Does NOT** modify other users' message content
 
-## Licencia
+## License
 
 MIT License
