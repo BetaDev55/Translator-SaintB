@@ -336,8 +336,47 @@
                     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
                     z-index: 1000;
                     overflow: hidden;
-                    padding: 4px 0;
                     min-width: 100%;
+                }
+                .tp-dropdown-search::-webkit-scrollbar,
+                .tp-dropdown-options::-webkit-scrollbar {
+                    width: 8px;
+                }
+                .tp-dropdown-search::-webkit-scrollbar-track,
+                .tp-dropdown-options::-webkit-scrollbar-track {
+                    background: rgba(0, 0, 0, 0.2);
+                    border-radius: 4px;
+                }
+                .tp-dropdown-search::-webkit-scrollbar-thumb,
+                .tp-dropdown-options::-webkit-scrollbar-thumb {
+                    background: #36393f;
+                    border-radius: 4px;
+                }
+                .tp-dropdown-search::-webkit-scrollbar-thumb:hover,
+                .tp-dropdown-options::-webkit-scrollbar-thumb:hover {
+                    background: #454a52;
+                }
+                .tp-dropdown-search {
+                    width: calc(100% - 16px);
+                    margin: 6px 8px;
+                    padding: 8px 10px;
+                    background: rgba(0, 0, 0, 0.3);
+                    border: 1px solid #36393f;
+                    border-radius: 6px;
+                    color: #f2f3f5;
+                    font-size: 13px;
+                    outline: none;
+                }
+                .tp-dropdown-search:focus {
+                    border-color: #5865f2;
+                }
+                .tp-dropdown-search::placeholder {
+                    color: #72767d;
+                }
+                .tp-dropdown-options {
+                    max-height: 200px;
+                    overflow-y: auto;
+                    padding: 4px 0;
                 }
                 .tp-dropdown-option {
                     padding: 10px 12px;
@@ -470,6 +509,7 @@
         UserStore: null,
         GuildStore: null,
         MessageStore: null,
+        ChannelStore: null,
         activeChannelId: null,
         DataStore: null,
         uiLang: "en",
@@ -696,6 +736,7 @@
             state.UserStore = window.Vencord?.Webpack?.Common?.UserStore;
             state.GuildStore = window.Vencord?.Webpack?.Common?.GuildStore;
             state.MessageStore = window.Vencord?.Webpack?.Common?.MessageStore;
+            state.ChannelStore = window.Vencord?.Webpack?.Common?.ChannelStore;
 
             if (state.FluxDispatcher && state.MessageActions) {
                 clearInterval(interval);
@@ -893,18 +934,35 @@
         titleMain.className = "tp-settings-title";
         titleMain.textContent = t("modalTitle");
 
-        // Obtener nombre e icono del servidor
+        // Obtener nombre e icono del servidor o usuario DM
         let serverName = "DM";
         let serverIconUrl = null;
         const guildId = getActiveGuildId();
         if (guildId && state.GuildStore && state.GuildStore.getGuild) {
+            // Estamos en un servidor
             const guild = state.GuildStore.getGuild(guildId);
             if (guild && guild.name) {
                 serverName = guild.name;
-                // Construir URL del icono si existe
                 if (guild.icon) {
                     const ext = guild.icon.startsWith("a_") ? "gif" : "png";
                     serverIconUrl = `https://cdn.discordapp.com/icons/${guildId}/${guild.icon}.${ext}?size=64`;
+                }
+            }
+        } else {
+            // Estamos en un DM - obtener info del destinatario desde ChannelStore
+            const channelId = getActiveChannelId();
+            if (channelId && state.ChannelStore && state.UserStore) {
+                const channel = state.ChannelStore.getChannel(channelId);
+                if (channel && channel.recipients && channel.recipients.length > 0) {
+                    const recipientId = channel.recipients[0];
+                    const user = state.UserStore.getUser(recipientId);
+                    if (user) {
+                        serverName = user.globalName || user.username || "DM";
+                        if (user.avatar) {
+                            const ext = user.avatar.startsWith("a_") ? "gif" : "png";
+                            serverIconUrl = `https://cdn.discordapp.com/avatars/${recipientId}/${user.avatar}.${ext}?size=64`;
+                        }
+                    }
                 }
             }
         }
@@ -990,16 +1048,20 @@
             section.appendChild(beforeSendRow);
         }
 
-        const outputRow = createSelectRow(t("translateTo"), settings.outputLang, ["es", "en", "ru", "pt", "fr", "de", "ja", "ko", "zh"], async function(value) {
+        // Lista completa de idiomas para dropdowns
+        const LANGUAGES = ["af","ar","az","be","bg","bn","bs","ca","ceb","co","cs","cy","da","de","el","en","eo","es","et","eu","fa","fi","fr","fy","ga","gd","gl","gu","ha","haw","he","hi","hmn","hr","ht","hu","hy","id","ig","is","it","ja","jw","ka","kk","km","kn","ko","ku","ky","la","lb","lo","lt","lv","mg","mi","mk","ml","mn","mr","ms","mt","my","ne","nl","no","ny","or","pa","pl","ps","pt","ro","ru","sa","sc","sd","si","sk","sl","sm","sn","so","sq","sr","st","su","sv","sw","ta","te","tg","th","tk","tl","tr","tt","uk","ur","uz","vi","xh","yi","yo","zh","zh-TW","zu"];
+        const UI_LANGUAGES = ["auto"].concat(LANGUAGES);
+
+        const outputRow = createSelectRow(t("translateTo"), settings.outputLang, LANGUAGES, async function(value) {
             getChannelSettings(channelId)[type].outputLang = value;
             await setChannelSettings(channelId, getChannelSettings(channelId));
-        });
+        }, "up");
         section.appendChild(outputRow);
 
-        const inputRow = createSelectRow(t("messageLanguage"), settings.inputLang, ["auto", "es", "en", "ru", "pt", "fr", "de", "ja", "ko", "zh"], async function(value) {
+        const inputRow = createSelectRow(t("messageLanguage"), settings.inputLang, UI_LANGUAGES, async function(value) {
             getChannelSettings(channelId)[type].inputLang = value;
             await setChannelSettings(channelId, getChannelSettings(channelId));
-        });
+        }, "up");
         section.appendChild(inputRow);
 
         return section;
@@ -1036,7 +1098,7 @@
         return row;
     }
 
-    function createSelectRow(label, value, options, onChange) {
+    function createSelectRow(label, value, options, onChange, direction = "down") {
         const row = document.createElement("div");
         row.className = "tp-settings-row";
 
@@ -1047,6 +1109,7 @@
         // Custom dropdown en lugar de <select> nativo
         const selectWrapper = document.createElement("div");
         selectWrapper.className = "tp-select-wrap";
+        selectWrapper.style.position = "relative";
 
         const selectBtn = document.createElement("button");
         selectBtn.className = "tp-select-btn";
@@ -1067,24 +1130,73 @@
         const dropdown = document.createElement("div");
         dropdown.className = "tp-dropdown";
         dropdown.style.display = "none";
+        if (direction === "up") {
+            dropdown.style.bottom = "calc(100% + 4px)";
+            dropdown.style.top = "auto";
+        } else {
+            dropdown.style.top = "calc(100% + 4px)";
+            dropdown.style.bottom = "auto";
+        }
 
+        // Input de búsqueda dentro del dropdown
+        const searchInput = document.createElement("input");
+        searchInput.type = "text";
+        searchInput.className = "tp-dropdown-search";
+        searchInput.placeholder = "Buscar idioma...";
+        searchInput.autocomplete = "off";
+
+        // Contenedor scrolleable para las opciones
+        const optionsContainer = document.createElement("div");
+        optionsContainer.className = "tp-dropdown-options";
+
+        // Crear todas las opciones
+        const allOptions = [];
         options.forEach(function(opt) {
             const optEl = document.createElement("div");
             optEl.className = "tp-dropdown-option";
             optEl.dataset.value = opt;
+            optEl.dataset.search = (opt === "auto" ? "Auto" : getLanguageName(opt)).toLowerCase();
             optEl.textContent = opt === "auto" ? "Auto" : getLanguageName(opt);
             if (opt === value) optEl.classList.add("selected");
             optEl.addEventListener("click", function(e) {
                 e.stopPropagation();
-                // Update selected
                 dropdown.querySelectorAll(".tp-dropdown-option").forEach(o => o.classList.remove("selected"));
                 optEl.classList.add("selected");
                 selectValue.textContent = opt === "auto" ? "Auto" : getLanguageName(opt);
                 dropdown.style.display = "none";
+                searchInput.value = "";
                 onChange(opt);
             });
-            dropdown.appendChild(optEl);
+            allOptions.push(optEl);
+            optionsContainer.appendChild(optEl);
         });
+
+        // Filtrar y hacer scroll al buscar
+        searchInput.addEventListener("input", function(e) {
+            const query = e.target.value.toLowerCase();
+            let firstMatch = null;
+            allOptions.forEach(function(optEl) {
+                const searchable = optEl.dataset.search;
+                const matches = searchable.includes(query);
+                optEl.style.display = matches ? "" : "none";
+                if (matches && !firstMatch) firstMatch = optEl;
+            });
+            // Auto-scroll a la primera coincidencia
+            if (firstMatch) {
+                firstMatch.scrollIntoView({ block: "nearest", behavior: "smooth" });
+            }
+        });
+
+        // Cerrar dropdown al escribir Enter o Escape
+        searchInput.addEventListener("keydown", function(e) {
+            if (e.key === "Enter" || e.key === "Escape") {
+                dropdown.style.display = "none";
+                searchInput.value = "";
+            }
+        });
+
+        dropdown.appendChild(searchInput);
+        dropdown.appendChild(optionsContainer);
 
         selectWrapper.appendChild(dropdown);
 
@@ -1093,6 +1205,9 @@
             e.stopPropagation();
             const isOpen = dropdown.style.display === "block";
             dropdown.style.display = isOpen ? "none" : "block";
+            if (!isOpen) {
+                searchInput.focus();
+            }
         });
 
         // Close dropdown when clicking outside
@@ -1110,9 +1225,34 @@
 
     function getLanguageName(code) {
         const names = {
-            "auto": "Auto", "es": "Español", "en": "English", "ru": "Русский",
-            "pt": "Português", "fr": "Français", "de": "Deutsch", "ja": "日本語",
-            "ko": "한국어", "zh": "中文"
+            "auto": "Auto",
+            "af": "Afrikaans", "ar": "العربية", "az": "Azərbaycan", "be": "Беларуская",
+            "bg": "Български", "bn": "বাংলা", "bs": "Bosanski", "ca": "Català",
+            "ceb": "Cebuano", "co": "Corsu", "cs": "Čeština", "cy": "Cymraeg",
+            "da": "Dansk", "de": "Deutsch", "el": "Ελληνικά", "en": "English",
+            "eo": "Esperanto", "es": "Español", "et": "Eesti", "eu": "Euskara",
+            "fa": "فارسی", "fi": "Suomi", "fr": "Français", "fy": "Frysk",
+            "ga": "Gaeilge", "gd": "Gàidhlig", "gl": "Galego", "gu": "ગુજરાતી",
+            "ha": "Hausa", "haw": "Hawaiʻi", "he": "עברית", "hi": "हिन्दी",
+            "hmn": "Hmong", "hr": "Hrvatski", "ht": "Kreyòl Ayisyen", "hu": "Magyar",
+            "hy": "Հայերեն", "id": "Bahasa Indonesia", "ig": "Igbo", "is": "Íslenska",
+            "it": "Italiano", "ja": "日本語", "jw": "Jawa", "ka": "ქართული",
+            "kk": "Қазақ", "km": "Khmer", "kn": "ಕನ್ನಡ", "ko": "한국어",
+            "ku": "Kurdî", "ky": "Кыргызча", "la": "Latina", "lb": "Lëtzebuergesch",
+            "lo": "Lao", "lt": "Lietuvių", "lv": "Latviešu", "mg": "Malagasy",
+            "mi": "Māori", "mk": "Македонски", "ml": "മലയാളം", "mn": "Монгол",
+            "mr": "मराठी", "ms": "Bahasa Melayu", "mt": "Malti", "my": "မြန်မာ",
+            "ne": "नेपाली", "nl": "Nederlands", "no": "Norsk", "ny": "Chichewa",
+            "or": "ଓଡ଼ା", "pa": "ਪੰਜਾਬੀ", "pl": "Polski", "ps": "پښتو",
+            "pt": "Português", "ro": "Română", "ru": "Русский", "sa": "संस्कृतम्",
+            "sc": "Sardu", "sd": "سنڌي", "si": "සිංහල", "sk": "Slovenčina",
+            "sl": "Slovenščina", "sm": "Gagana Samoa", "sn": "Shona", "so": "Soomaali",
+            "sq": "Shqip", "sr": "Српски", "st": "Sesotho", "su": "Basa Sunda",
+            "sv": "Svenska", "sw": "Kiswahili", "ta": "தமிழ்", "te": "తెలుగు",
+            "tg": "Тоҷикӣ", "th": "ไทย", "tk": "Türkmen", "tl": "Filipino",
+            "tr": "Türkçe", "tt": "Татар", "uk": "Українська", "ur": "اردو",
+            "uz": "Oʻzbek", "vi": "Tiếng Việt", "xh": "IsiXhosa", "yi": "ייִדיש",
+            "yo": "Yorùbá", "zh": "中文", "zh-TW": "繁體中文", "zu": "isiZulu"
         };
         return names[code] || code;
     }
