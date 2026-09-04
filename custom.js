@@ -103,8 +103,8 @@
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
-                    padding: 20px 24px;
-                    background: linear-gradient(180deg, rgba(88, 101, 242, 0.1) 0%, transparent 100%);
+                    padding: 24px 24px 16px 24px;
+                    background: linear-gradient(180deg, rgba(88, 101, 242, 0.12) 0%, transparent 100%);
                     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
                 }
                 .tp-settings-header-left {
@@ -137,31 +137,38 @@
                 .tp-settings-subtitle {
                     display: flex;
                     align-items: center;
-                    gap: 10px;
-                    font-size: 18px;
-                    font-weight: 600;
-                    color: #b5c2f8;
-                    text-shadow: 0 0 12px rgba(88, 101, 242, 0.4);
-                    max-width: 300px;
+                    gap: 12px;
+                    font-size: 22px;
+                    font-weight: 700;
+                    color: #dee0fc;
+                    text-shadow: 0 0 20px rgba(88, 101, 242, 0.5);
+                    max-width: 340px;
                     overflow: hidden;
                     text-overflow: ellipsis;
                     white-space: nowrap;
+                    padding: 8px 0 4px 0;
                 }
                 .tp-server-icon {
                     display: inline-flex;
                     align-items: center;
                     justify-content: center;
-                    width: 28px;
-                    height: 28px;
+                    width: 44px;
+                    height: 44px;
                     border-radius: 50%;
                     background: linear-gradient(135deg, #5865f2 0%, #4752c4 100%);
                     flex-shrink: 0;
                     overflow: hidden;
+                    box-shadow: 0 0 20px rgba(88, 101, 242, 0.4);
+                    animation: tp-server-glow 3s ease-in-out infinite;
                 }
                 .tp-server-icon img {
                     width: 100%;
                     height: 100%;
                     object-fit: cover;
+                }
+                @keyframes tp-server-glow {
+                    0%, 100% { box-shadow: 0 0 20px rgba(88, 101, 242, 0.4); }
+                    50% { box-shadow: 0 0 30px rgba(88, 101, 242, 0.7); }
                 }
                 .tp-settings-close {
                     background: transparent;
