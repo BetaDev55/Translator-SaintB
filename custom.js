@@ -392,8 +392,82 @@
         UserStore: null,
         MessageStore: null,
         activeChannelId: null,
-        DataStore: null
+        DataStore: null,
+        uiLang: "en",
+        uiTranslations: {},
+        uiStringsTranslated: false
     };
+
+    // ==================== UI STRINGS (i18n) ====================
+    const uiStrings = {
+        receivedMessages: "RECEIVED MESSAGES",
+        sentMessages: "SENT MESSAGES",
+        autoTranslate: "Auto translate",
+        translateBeforeSend: "Translate before sending",
+        translateTo: "Translate to",
+        messageLanguage: "Message language",
+        close: "Close"
+    };
+
+    // Detectar idioma de Discord
+    function detectDiscordLocale() {
+        try {
+            const discordLocale = window.DiscordLocale || window.Vencord?.Settings?.settings?.locale;
+            if (discordLocale) {
+                const lang = discordLocale.toLowerCase().substring(0, 2);
+                if (lang === "es") return "es";
+            }
+        } catch(e) {}
+        return "en";
+    }
+
+    // Traducir todas las UI strings
+    async function translateUIStrings(targetLang) {
+        if (targetLang === "en") {
+            state.uiTranslations = { ...uiStrings };
+            state.uiStringsTranslated = true;
+            return;
+        }
+
+        // Ya traducidas?
+        if (state.uiTranslations[targetLang]) {
+            return;
+        }
+
+        const keys = Object.keys(uiStrings);
+        const values = Object.values(uiStrings);
+
+        try {
+            const text = values.join("|||");
+            const url = "https://translate.googleapis.com/translate_a/single?" +
+                "client=gtx&sl=auto&tl=" + targetLang + "&dt=t&q=" + encodeURIComponent(text);
+
+            const response = await fetch(url);
+            if (!response.ok) throw new Error("HTTP " + response.status);
+            const data = await response.json();
+
+            if (data[0]) {
+                const translated = data[0].map(t => t[0]);
+                const translatedObj = {};
+                keys.forEach((key, i) => {
+                    translatedObj[key] = translated[i] || uiStrings[key];
+                });
+                state.uiTranslations[targetLang] = translatedObj;
+                state.uiStringsTranslated = true;
+                console.log("[Translator SaintB] UI strings translated to:", targetLang);
+            }
+        } catch(e) {
+            console.error("[Translator SaintB] Error translating UI:", e.message);
+            state.uiTranslations[targetLang] = { ...uiStrings };
+            state.uiStringsTranslated = true;
+        }
+    }
+
+    // Obtener string traducido
+    function t(key) {
+        if (state.uiLang === "en") return uiStrings[key] || key;
+        return state.uiTranslations[state.uiLang]?.[key] || uiStrings[key] || key;
+    }
 
     // ==================== LOGGING ====================
     function tpLog(action, msgId, data) {
@@ -716,10 +790,10 @@
         header.appendChild(closeBtn);
         content.appendChild(header);
 
-        const receivedSection = createSettingsSection("MENSAJES RECIBIDOS", chSettings.received, "received", channelId);
+        const receivedSection = createSettingsSection(t("receivedMessages"), chSettings.received, "received", channelId);
         content.appendChild(receivedSection);
 
-        const sentSection = createSettingsSection("MENSAJES ENVIADOS", chSettings.sent, "sent", channelId);
+        const sentSection = createSettingsSection(t("sentMessages"), chSettings.sent, "sent", channelId);
         content.appendChild(sentSection);
 
         modal.appendChild(content);
@@ -742,27 +816,27 @@
         titleEl.textContent = title;
         section.appendChild(titleEl);
 
-        const autoRow = createToggleRow("Traducción automática", settings.autoTranslate, async function(checked) {
+        const autoRow = createToggleRow(t("autoTranslate"), settings.autoTranslate, async function(checked) {
             getChannelSettings(channelId)[type].autoTranslate = checked;
             await setChannelSettings(channelId, getChannelSettings(channelId));
         });
         section.appendChild(autoRow);
 
         if (type === "sent") {
-            const beforeSendRow = createToggleRow("Traducir antes de enviar", settings.translateBeforeSend, async function(checked) {
+            const beforeSendRow = createToggleRow(t("translateBeforeSend"), settings.translateBeforeSend, async function(checked) {
                 getChannelSettings(channelId)[type].translateBeforeSend = checked;
                 await setChannelSettings(channelId, getChannelSettings(channelId));
             });
             section.appendChild(beforeSendRow);
         }
 
-        const outputRow = createSelectRow("Traducir a", settings.outputLang, ["es", "en", "ru", "pt", "fr", "de", "ja", "ko", "zh"], async function(value) {
+        const outputRow = createSelectRow(t("translateTo"), settings.outputLang, ["es", "en", "ru", "pt", "fr", "de", "ja", "ko", "zh"], async function(value) {
             getChannelSettings(channelId)[type].outputLang = value;
             await setChannelSettings(channelId, getChannelSettings(channelId));
         });
         section.appendChild(outputRow);
 
-        const inputRow = createSelectRow("Idioma del mensaje", settings.inputLang, ["auto", "es", "en", "ru", "pt", "fr", "de", "ja", "ko", "zh"], async function(value) {
+        const inputRow = createSelectRow(t("messageLanguage"), settings.inputLang, ["auto", "es", "en", "ru", "pt", "fr", "de", "ja", "ko", "zh"], async function(value) {
             getChannelSettings(channelId)[type].inputLang = value;
             await setChannelSettings(channelId, getChannelSettings(channelId));
         });
@@ -1864,8 +1938,14 @@
     }
 
     // ==================== INICIO ====================
-    waitForVencord(function() {
+    waitForVencord(async function() {
         console.log("[Translator SaintB] FluxDispatcher encontrado!");
+        
+        // Detectar idioma de Discord y traducir UI
+        const discordLang = detectDiscordLocale();
+        state.uiLang = discordLang;
+        await translateUIStrings(discordLang);
+        
         init();
     });
 
