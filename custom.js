@@ -137,12 +137,12 @@
                 .tp-settings-subtitle {
                     display: flex;
                     align-items: center;
-                    gap: 8px;
-                    font-size: 16px;
+                    gap: 10px;
+                    font-size: 18px;
                     font-weight: 600;
                     color: #b5c2f8;
                     text-shadow: 0 0 12px rgba(88, 101, 242, 0.4);
-                    max-width: 280px;
+                    max-width: 300px;
                     overflow: hidden;
                     text-overflow: ellipsis;
                     white-space: nowrap;
@@ -151,8 +151,8 @@
                     display: inline-flex;
                     align-items: center;
                     justify-content: center;
-                    width: 20px;
-                    height: 20px;
+                    width: 28px;
+                    height: 28px;
                     border-radius: 50%;
                     background: linear-gradient(135deg, #5865f2 0%, #4752c4 100%);
                     flex-shrink: 0;
