@@ -1273,6 +1273,12 @@
         btn.addEventListener("click", async function(e) {
             e.preventDefault();
             e.stopPropagation();
+            
+            // Evitar clicks múltiples mientras traduce
+            if (btn.disabled) return;
+            btn.disabled = true;
+            btn.style.opacity = "0.5";
+            
             console.log("Translator SaintB: COMPOSER BUTTON CLICKED");
             const channelId = getActiveChannelId();
             console.log("Translator SaintB: channelId=" + channelId + " path=" + window.location.pathname);
@@ -1282,6 +1288,10 @@
             } else {
                 console.log("Translator SaintB: no channelId");
             }
+            
+            // Re-habilitar botón
+            btn.disabled = false;
+            btn.style.opacity = "1";
         }, true); // capture: true
 
         btn.addEventListener("mouseenter", function() { 
