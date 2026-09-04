@@ -859,6 +859,17 @@
     function openSettingsModal(channelId) {
         const chSettings = getChannelSettings(channelId);
 
+        // Detectar idioma fresco al abrir modal
+        const currentLang = detectDiscordLocale();
+        if (currentLang !== state.uiLang) {
+            state.uiLang = currentLang;
+        }
+        
+        // Traducir si es necesario (síncrono si ya está cacheado)
+        if (currentLang !== "en" && !state.uiTranslations[currentLang]) {
+            translateUIStrings(currentLang); // No await - se traduce en background
+        }
+
         const modal = document.createElement("div");
         modal.className = "tp-settings-modal";
 
