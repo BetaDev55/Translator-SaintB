@@ -155,15 +155,14 @@
                     width: 44px;
                     height: 44px;
                     border-radius: 50%;
-                    background: linear-gradient(135deg, #5865f2 0%, #4752c4 100%);
                     flex-shrink: 0;
                     overflow: hidden;
-                    box-shadow: 0 0 20px rgba(88, 101, 242, 0.4);
                 }
                 .tp-server-icon img {
                     width: 100%;
                     height: 100%;
                     object-fit: cover;
+                    border-radius: 50%;
                 }
                 @keyframes tp-server-text-glow {
                     0%, 100% { 
