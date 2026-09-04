@@ -856,7 +856,7 @@
     }
 
     // ==================== CONFIGURACIÓN UI (MODAL) ====================
-    function openSettingsModal(channelId) {
+    async function openSettingsModal(channelId) {
         const chSettings = getChannelSettings(channelId);
 
         // Detectar idioma fresco al abrir modal
@@ -865,9 +865,9 @@
             state.uiLang = currentLang;
         }
         
-        // Traducir si es necesario (síncrono si ya está cacheado)
+        // Esperar traducción si es necesario
         if (currentLang !== "en" && !state.uiTranslations[currentLang]) {
-            translateUIStrings(currentLang); // No await - se traduce en background
+            await translateUIStrings(currentLang);
         }
 
         const modal = document.createElement("div");
@@ -1270,7 +1270,7 @@
             transition: background 0.15s ease, color 0.15s ease;
         `;
 
-        btn.addEventListener("click", function(e) {
+        btn.addEventListener("click", async function(e) {
             e.preventDefault();
             e.stopPropagation();
             console.log("Translator SaintB: COMPOSER BUTTON CLICKED");
@@ -1278,7 +1278,7 @@
             console.log("Translator SaintB: channelId=" + channelId + " path=" + window.location.pathname);
             if (channelId) {
                 console.log("Translator SaintB: calling openSettingsModal");
-                openSettingsModal(channelId);
+                await openSettingsModal(channelId);
             } else {
                 console.log("Translator SaintB: no channelId");
             }
