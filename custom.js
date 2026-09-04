@@ -135,14 +135,23 @@
                     letter-spacing: -0.01em;
                 }
                 .tp-settings-subtitle {
-                    font-size: 14px;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    font-size: 15px;
                     font-weight: 600;
-                    color: #dee0fc;
-                    text-shadow: 0 0 10px rgba(88, 101, 242, 0.3);
+                    color: #b5c2f8;
+                    text-shadow: 0 0 12px rgba(88, 101, 242, 0.4);
                     max-width: 280px;
                     overflow: hidden;
                     text-overflow: ellipsis;
                     white-space: nowrap;
+                }
+                .tp-server-icon {
+                    display: inline-flex;
+                    align-items: center;
+                    color: #7289da;
+                    flex-shrink: 0;
                 }
                 .tp-settings-close {
                     background: transparent;
@@ -246,17 +255,19 @@
                     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
                 }
                 
-                /* Select - Discord Style */
+                /* Custom Dropdown - Discord Style */
                 .tp-select-wrap {
                     position: relative;
                     display: inline-flex;
                 }
-                .tp-select {
-                    appearance: none;
+                .tp-select-btn {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
                     background: linear-gradient(180deg, #2f3136 0%, #28292d 100%);
                     border: 1px solid #36393f;
                     border-radius: 6px;
-                    padding: 8px 36px 8px 12px;
+                    padding: 8px 32px 8px 12px;
                     font-size: 14px;
                     font-weight: 500;
                     color: #fff;
@@ -265,19 +276,19 @@
                     transition: all 0.15s ease;
                     min-width: 120px;
                     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset;
+                    font-family: inherit;
                 }
-                .tp-select:hover {
+                .tp-select-btn:hover {
                     border-color: #5865f2;
                     background: linear-gradient(180deg, #36393f 0%, #2f3136 100%);
                 }
-                .tp-select:focus {
+                .tp-select-btn:focus {
                     border-color: #5865f2;
                     box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.25);
                 }
-                .tp-select option {
-                    background: #2f3136;
-                    color: #fff;
-                    padding: 8px;
+                .tp-select-value {
+                    flex: 1;
+                    text-align: left;
                 }
                 .tp-select-arrow {
                     position: absolute;
@@ -290,6 +301,40 @@
                 }
                 .tp-select-wrap:hover .tp-select-arrow {
                     color: #5865f2;
+                }
+                
+                /* Dropdown Menu */
+                .tp-dropdown {
+                    position: absolute;
+                    top: calc(100% + 4px);
+                    left: 0;
+                    right: 0;
+                    background: linear-gradient(180deg, #2f3136 0%, #28292d 100%);
+                    border: 1px solid #36393f;
+                    border-radius: 8px;
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
+                    z-index: 1000;
+                    overflow: hidden;
+                    padding: 4px 0;
+                    min-width: 100%;
+                }
+                .tp-dropdown-option {
+                    padding: 10px 12px;
+                    font-size: 14px;
+                    font-weight: 500;
+                    color: #b5bac1;
+                    cursor: pointer;
+                    transition: all 0.1s ease;
+                    margin: 0 4px;
+                    border-radius: 4px;
+                }
+                .tp-dropdown-option:hover {
+                    background: rgba(88, 101, 242, 0.2);
+                    color: #fff;
+                }
+                .tp-dropdown-option.selected {
+                    background: rgba(88, 101, 242, 0.3);
+                    color: #dee0fc;
                 }
                 
                 /* Animations */
@@ -813,17 +858,30 @@
 
         // Obtener nombre del servidor
         let serverName = "DM";
+        let showServerIcon = false;
         const guildId = getActiveGuildId();
         if (guildId && state.GuildStore && state.GuildStore.getGuild) {
             const guild = state.GuildStore.getGuild(guildId);
             if (guild && guild.name) {
                 serverName = guild.name;
+                showServerIcon = true;
             }
         }
 
-        const titleSub = document.createElement("span");
+        const titleSub = document.createElement("div");
         titleSub.className = "tp-settings-subtitle";
-        titleSub.textContent = serverName;
+        
+        // Icono de servidor (antes del nombre)
+        if (showServerIcon) {
+            const serverIcon = document.createElement("span");
+            serverIcon.className = "tp-server-icon";
+            serverIcon.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`;
+            titleSub.appendChild(serverIcon);
+        }
+        
+        const serverNameEl = document.createElement("span");
+        serverNameEl.textContent = serverName;
+        titleSub.appendChild(serverNameEl);
 
         titleWrap.appendChild(titleMain);
         titleWrap.appendChild(titleSub);
@@ -932,28 +990,64 @@
         labelEl.className = "tp-settings-label";
         labelEl.textContent = label;
 
+        // Custom dropdown en lugar de <select> nativo
         const selectWrapper = document.createElement("div");
         selectWrapper.className = "tp-select-wrap";
 
-        const select = document.createElement("select");
-        select.className = "tp-select";
+        const selectBtn = document.createElement("button");
+        selectBtn.className = "tp-select-btn";
+        
+        const selectValue = document.createElement("span");
+        selectValue.className = "tp-select-value";
+        selectValue.textContent = value === "auto" ? "Auto" : getLanguageName(value);
+        
+        const selectArrow = document.createElement("span");
+        selectArrow.className = "tp-select-arrow";
+        selectArrow.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+        
+        selectBtn.appendChild(selectValue);
+        selectBtn.appendChild(selectArrow);
+        selectWrapper.appendChild(selectBtn);
+
+        // Dropdown menu
+        const dropdown = document.createElement("div");
+        dropdown.className = "tp-dropdown";
+        dropdown.style.display = "none";
 
         options.forEach(function(opt) {
-            const optEl = document.createElement("option");
-            optEl.value = opt;
+            const optEl = document.createElement("div");
+            optEl.className = "tp-dropdown-option";
+            optEl.dataset.value = opt;
             optEl.textContent = opt === "auto" ? "Auto" : getLanguageName(opt);
-            if (opt === value) optEl.selected = true;
-            select.appendChild(optEl);
+            if (opt === value) optEl.classList.add("selected");
+            optEl.addEventListener("click", function(e) {
+                e.stopPropagation();
+                // Update selected
+                dropdown.querySelectorAll(".tp-dropdown-option").forEach(o => o.classList.remove("selected"));
+                optEl.classList.add("selected");
+                selectValue.textContent = opt === "auto" ? "Auto" : getLanguageName(opt);
+                dropdown.style.display = "none";
+                onChange(opt);
+            });
+            dropdown.appendChild(optEl);
         });
 
-        select.onchange = function() { onChange(select.value); };
+        selectWrapper.appendChild(dropdown);
 
-        const arrow = document.createElement("span");
-        arrow.className = "tp-select-arrow";
-        arrow.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+        // Toggle dropdown on click
+        selectBtn.addEventListener("click", function(e) {
+            e.stopPropagation();
+            const isOpen = dropdown.style.display === "block";
+            dropdown.style.display = isOpen ? "none" : "block";
+        });
 
-        selectWrapper.appendChild(select);
-        selectWrapper.appendChild(arrow);
+        // Close dropdown when clicking outside
+        document.addEventListener("click", function closeDropdown(e) {
+            if (!selectWrapper.contains(e.target)) {
+                dropdown.style.display = "none";
+            }
+        });
+
         row.appendChild(labelEl);
         row.appendChild(selectWrapper);
 
