@@ -137,8 +137,8 @@
                 .tp-settings-subtitle {
                     display: flex;
                     align-items: center;
-                    gap: 6px;
-                    font-size: 15px;
+                    gap: 8px;
+                    font-size: 16px;
                     font-weight: 600;
                     color: #b5c2f8;
                     text-shadow: 0 0 12px rgba(88, 101, 242, 0.4);
@@ -150,8 +150,18 @@
                 .tp-server-icon {
                     display: inline-flex;
                     align-items: center;
-                    color: #7289da;
+                    justify-content: center;
+                    width: 20px;
+                    height: 20px;
+                    border-radius: 50%;
+                    background: linear-gradient(135deg, #5865f2 0%, #4752c4 100%);
                     flex-shrink: 0;
+                    overflow: hidden;
+                }
+                .tp-server-icon img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
                 }
                 .tp-settings-close {
                     background: transparent;
@@ -856,28 +866,45 @@
         titleMain.className = "tp-settings-title";
         titleMain.textContent = t("modalTitle");
 
-        // Obtener nombre del servidor
+        // Obtener nombre e icono del servidor
         let serverName = "DM";
-        let showServerIcon = false;
+        let serverIconUrl = null;
         const guildId = getActiveGuildId();
         if (guildId && state.GuildStore && state.GuildStore.getGuild) {
             const guild = state.GuildStore.getGuild(guildId);
             if (guild && guild.name) {
                 serverName = guild.name;
-                showServerIcon = true;
+                // Construir URL del icono si existe
+                if (guild.icon) {
+                    const ext = guild.icon.startsWith("a_") ? "gif" : "png";
+                    serverIconUrl = `https://cdn.discordapp.com/icons/${guildId}/${guild.icon}.${ext}?size=64`;
+                }
             }
         }
 
         const titleSub = document.createElement("div");
         titleSub.className = "tp-settings-subtitle";
         
-        // Icono de servidor (antes del nombre)
-        if (showServerIcon) {
-            const serverIcon = document.createElement("span");
-            serverIcon.className = "tp-server-icon";
-            serverIcon.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`;
-            titleSub.appendChild(serverIcon);
+        // Icono del servidor (antes del nombre)
+        const serverIcon = document.createElement("span");
+        serverIcon.className = "tp-server-icon";
+        
+        if (serverIconUrl) {
+            // Usar icono real del servidor
+            const iconImg = document.createElement("img");
+            iconImg.src = serverIconUrl;
+            iconImg.alt = serverName;
+            iconImg.onerror = function() {
+                // Fallback si falla la carga
+                serverIcon.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><text x="12" y="16" text-anchor="middle" font-size="12" font-weight="600">${serverName.charAt(0).toUpperCase()}</text></svg>`;
+            };
+            serverIcon.appendChild(iconImg);
+        } else {
+            // Fallback con iniciales
+            const initial = serverName.charAt(0).toUpperCase();
+            serverIcon.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><text x="12" y="17" text-anchor="middle" font-size="13" font-weight="700" font-family="Discord">${initial}</text></svg>`;
         }
+        titleSub.appendChild(serverIcon);
         
         const serverNameEl = document.createElement("span");
         serverNameEl.textContent = serverName;
