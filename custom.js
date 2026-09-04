@@ -507,13 +507,18 @@
                 discordLocale = window.Vencord?.Settings?.settings?.locale;
             }
             
+            // Fallback a document.documentElement.lang (Discord establece esto)
+            if (!discordLocale) {
+                discordLocale = document.documentElement.lang;
+            }
+            
             // Fallback a navigator.language
             if (!discordLocale) {
                 discordLocale = navigator.language;
             }
             
             if (discordLocale) {
-                // Discord usa formatos como "en", "es-ES", "pt-BR"
+                // Discord usa formatos como "en", "es-ES", "pt-BR", "tr"
                 // Normalizar a código de 2 letras para Google Translate
                 const lang = discordLocale.toLowerCase().split('-')[0].substring(0, 2);
                 if (lang && lang.length === 2) {
