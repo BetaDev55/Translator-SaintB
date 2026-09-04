@@ -412,7 +412,19 @@
     // Detectar idioma de Discord
     function detectDiscordLocale() {
         try {
-            const discordLocale = window.DiscordLocale || window.Vencord?.Settings?.settings?.locale;
+            // Intentar DiscordLocale primero
+            let discordLocale = window.DiscordLocale;
+            
+            // Intentar Vencord settings
+            if (!discordLocale) {
+                discordLocale = window.Vencord?.Settings?.settings?.locale;
+            }
+            
+            // Fallback a navigator.language
+            if (!discordLocale) {
+                discordLocale = navigator.language;
+            }
+            
             if (discordLocale) {
                 // Discord usa formatos como "en", "es-ES", "pt-BR"
                 // Normalizar a código de 2 letras para Google Translate
