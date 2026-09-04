@@ -1068,8 +1068,8 @@
             return;
         }
 
-        // Buscar el toolbar de acciones: buttons__[hash] con aria-label="Acciones de mensajes"
-        const actionToolbar = msgEl.querySelector('[aria-label="Acciones de mensajes"][role="group"]');
+        // Buscar el toolbar de acciones: buttons__[hash] con aria-label conteniendo "Acciones"
+        const actionToolbar = msgEl.querySelector('[aria-label*="Acciones"][role="group"]');
 
         if (!actionToolbar) {
             tpLog("MSGBUTTON", msgId, { action: "ACTION_TOOLBAR_NOT_RENDERED" });
@@ -1612,7 +1612,7 @@
                     }
 
                     // Detectar si se añadió el toolbar de acciones (buttons__) a un mensaje existente
-                    if (node.classList?.contains('buttons__') && node.getAttribute('aria-label') === 'Acciones de mensajes') {
+                    if (node.classList?.contains('buttons__') && node.getAttribute('aria-label')?.includes('Acciones')) {
                         const msgListItem = node.closest('[data-list-item-id*="chat-messages"]');
                         if (msgListItem) {
                             tpLog("MSGOBSERVER", null, { action: "ACTION_TOOLBAR_APPEARED", listItemId: msgListItem.dataset.listItemId?.substring(0, 50) });
@@ -1621,7 +1621,7 @@
                     }
 
                     // También verificar si hay action toolbars dentro de nodos añadidos
-                    const actionToolbars = node.querySelectorAll?.('[aria-label="Acciones de mensajes"][role="group"]');
+                    const actionToolbars = node.querySelectorAll?.('[aria-label*="Acciones"][role="group"]');
                     if (actionToolbars && actionToolbars.length > 0) {
                         actionToolbars.forEach(function(toolbar) {
                             const msgListItem = toolbar.closest('[data-list-item-id*="chat-messages"]');
