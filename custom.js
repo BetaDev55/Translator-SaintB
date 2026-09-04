@@ -437,7 +437,7 @@
         return "en";
     }
 
-    // Traducir todas las UI strings
+    // Traducir todas las UI strings (una por una)
     async function translateUIStrings(targetLang) {
         if (targetLang === "en") {
             state.uiTranslations = { ...uiStrings };
@@ -450,33 +450,33 @@
             return;
         }
 
-        const keys = Object.keys(uiStrings);
-        const values = Object.values(uiStrings);
+        const translatedObj = {};
 
-        try {
-            const text = values.join("|||");
-            const url = "https://translate.googleapis.com/translate_a/single?" +
-                "client=gtx&sl=auto&tl=" + targetLang + "&dt=t&q=" + encodeURIComponent(text);
+        // Traducir cada string individualmente
+        for (const key of Object.keys(uiStrings)) {
+            try {
+                const text = uiStrings[key];
+                const url = "https://translate.googleapis.com/translate_a/single?" +
+                    "client=gtx&sl=auto&tl=" + targetLang + "&dt=t&q=" + encodeURIComponent(text);
 
-            const response = await fetch(url);
-            if (!response.ok) throw new Error("HTTP " + response.status);
-            const data = await response.json();
+                const response = await fetch(url);
+                if (!response.ok) throw new Error("HTTP " + response.status);
+                const data = await response.json();
 
-            if (data[0]) {
-                const translated = data[0].map(t => t[0]);
-                const translatedObj = {};
-                keys.forEach((key, i) => {
-                    translatedObj[key] = translated[i] || uiStrings[key];
-                });
-                state.uiTranslations[targetLang] = translatedObj;
-                state.uiStringsTranslated = true;
-                console.log("[Translator SaintB] UI strings translated to:", targetLang);
+                if (data[0] && data[0][0] && data[0][0][0]) {
+                    translatedObj[key] = data[0][0][0];
+                } else {
+                    translatedObj[key] = uiStrings[key];
+                }
+            } catch(e) {
+                console.error("[Translator SaintB] Error translating UI string:", key, e.message);
+                translatedObj[key] = uiStrings[key];
             }
-        } catch(e) {
-            console.error("[Translator SaintB] Error translating UI:", e.message);
-            state.uiTranslations[targetLang] = { ...uiStrings };
-            state.uiStringsTranslated = true;
         }
+
+        state.uiTranslations[targetLang] = translatedObj;
+        state.uiStringsTranslated = true;
+        console.log("[Translator SaintB] UI strings translated to:", targetLang);
     }
 
     // Obtener string traducido
