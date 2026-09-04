@@ -390,6 +390,7 @@
         FluxDispatcher: null,
         MessageActions: null,
         UserStore: null,
+        GuildStore: null,
         MessageStore: null,
         activeChannelId: null,
         DataStore: null,
@@ -398,8 +399,16 @@
         uiStringsTranslated: false
     };
 
+    // Helper para obtener guildId actual desde la URL
+    function getActiveGuildId() {
+        // URL: /channels/{guildId}/{channelId}
+        const match = window.location.pathname.match(/\/channels\/(\d+)\/\d+/);
+        return match ? match[1] : null;
+    }
+
     // ==================== UI STRINGS (i18n) ====================
     const uiStrings = {
+        modalTitle: "Translator",
         receivedMessages: "RECEIVED MESSAGES",
         sentMessages: "SENT MESSAGES",
         autoTranslate: "Auto translate",
@@ -602,6 +611,7 @@
             state.FluxDispatcher = window.Vencord?.Webpack?.Common?.FluxDispatcher;
             state.MessageActions = window.Vencord?.Webpack?.Common?.MessageActions;
             state.UserStore = window.Vencord?.Webpack?.Common?.UserStore;
+            state.GuildStore = window.Vencord?.Webpack?.Common?.GuildStore;
             state.MessageStore = window.Vencord?.Webpack?.Common?.MessageStore;
 
             if (state.FluxDispatcher && state.MessageActions) {
@@ -787,11 +797,21 @@
 
         const titleMain = document.createElement("span");
         titleMain.className = "tp-settings-title";
-        titleMain.textContent = "Translator";
+        titleMain.textContent = t("modalTitle");
+
+        // Obtener nombre del servidor
+        let serverName = "DM";
+        const guildId = getActiveGuildId();
+        if (guildId && state.GuildStore && state.GuildStore.getGuild) {
+            const guild = state.GuildStore.getGuild(guildId);
+            if (guild && guild.name) {
+                serverName = guild.name;
+            }
+        }
 
         const titleSub = document.createElement("span");
         titleSub.className = "tp-settings-subtitle";
-        titleSub.textContent = "Canal " + channelId;
+        titleSub.textContent = serverName;
 
         titleWrap.appendChild(titleMain);
         titleWrap.appendChild(titleSub);
