@@ -9,7 +9,6 @@ A powerful translation plugin for Legcord with an elegant, Discord-native interf
 - **Outgoing message translation**: Automatically translates before sending (when enabled)
 - **Translation format**: Bold translated text as protagonist, original quoted below
 - **Word-by-word animation**: Smooth reveal animation on translations
-- **Bulk translate**: Press `Ctrl+Shift+T` to translate all visible messages
 
 ### Per-Channel Configuration
 - **Independent settings**: Each channel has its own translation preferences
@@ -101,9 +100,6 @@ cp custom.js ~/.config/legcord/custom.js
 1. Click the 🌐 button in the composer (next to emoji picker)
 2. Adjust languages and toggle options
 3. Settings are saved per-channel automatically
-
-### Keyboard shortcut
-- `Ctrl+Shift+T` - Translate all visible messages in current channel
 
 ## Troubleshooting
 
