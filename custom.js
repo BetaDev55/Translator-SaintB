@@ -414,8 +414,12 @@
         try {
             const discordLocale = window.DiscordLocale || window.Vencord?.Settings?.settings?.locale;
             if (discordLocale) {
-                const lang = discordLocale.toLowerCase().substring(0, 2);
-                if (lang === "es") return "es";
+                // Discord usa formatos como "en", "es-ES", "pt-BR"
+                // Normalizar a código de 2 letras para Google Translate
+                const lang = discordLocale.toLowerCase().split('-')[0].substring(0, 2);
+                if (lang && lang.length === 2) {
+                    return lang;
+                }
             }
         } catch(e) {}
         return "en";
