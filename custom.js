@@ -137,16 +137,16 @@
                 .tp-settings-subtitle {
                     display: flex;
                     align-items: center;
-                    gap: 12px;
-                    font-size: 22px;
+                    gap: 14px;
+                    font-size: 26px;
                     font-weight: 700;
                     color: #dee0fc;
-                    text-shadow: 0 0 20px rgba(88, 101, 242, 0.5);
-                    max-width: 340px;
+                    max-width: 360px;
                     overflow: hidden;
                     text-overflow: ellipsis;
                     white-space: nowrap;
-                    padding: 8px 0 4px 0;
+                    padding: 10px 0 6px 0;
+                    animation: tp-server-text-glow 3s ease-in-out infinite;
                 }
                 .tp-server-icon {
                     display: inline-flex;
@@ -159,16 +159,21 @@
                     flex-shrink: 0;
                     overflow: hidden;
                     box-shadow: 0 0 20px rgba(88, 101, 242, 0.4);
-                    animation: tp-server-glow 3s ease-in-out infinite;
                 }
                 .tp-server-icon img {
                     width: 100%;
                     height: 100%;
                     object-fit: cover;
                 }
-                @keyframes tp-server-glow {
-                    0%, 100% { box-shadow: 0 0 20px rgba(88, 101, 242, 0.4); }
-                    50% { box-shadow: 0 0 30px rgba(88, 101, 242, 0.7); }
+                @keyframes tp-server-text-glow {
+                    0%, 100% { 
+                        text-shadow: 0 0 15px rgba(88, 101, 242, 0.4);
+                        color: #dee0fc;
+                    }
+                    50% { 
+                        text-shadow: 0 0 30px rgba(88, 101, 242, 0.8);
+                        color: #f0f2ff;
+                    }
                 }
                 .tp-settings-close {
                     background: transparent;
