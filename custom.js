@@ -1488,16 +1488,32 @@
             return;
         }
 
-        // Buscar el toolbar de acciones: buttons__[hash] con aria-label conteniendo "Acciones"
-        const actionToolbar = msgEl.querySelector('[aria-label*="Acciones"][role="group"]');
+        // Detección estructural robusta (sin dependencia de idioma ni de clase/rol del toolbar padre):
+        //   1. Buscar directamente el contenedor DESTINO "buttonsInner__" (es donde realmente va el botón).
+        //   2. Si lo encontramos, su parentElement ES el toolbar externo (cualquiera que sea su clase/rol).
+        //   3. Validar que ese buttonsInner__ contiene botones nativos (anti-falso-positivo).
+        //   4. Fallback al método clásico (padre buttons__ + role=group) si cambió la jerarquía.
+        let actionInner = msgEl.querySelector('[class*="buttonsInner__"]');
+        let actionToolbar = null;
+        if (actionInner) {
+            actionToolbar = actionInner.parentElement;
+        }
+        if (!actionToolbar || !actionInner) {
+            actionToolbar = msgEl.querySelector('[class*="buttons__"][role="group"]') ||
+                           msgEl.querySelector('[class*="buttons__"]');
+            if (actionToolbar) {
+                actionInner = actionToolbar.querySelector('[class*="buttonsInner__"]') ||
+                             msgEl.querySelector('[class*="buttonsInner__"]');
+            }
+        }
+        if (actionInner && !actionInner.querySelector('[class*="hoverBarButton__"], [class*="button_"]')) {
+            actionInner = null;
+        }
 
         if (!actionToolbar) {
             tpLog("MSGBUTTON", msgId, { action: "ACTION_TOOLBAR_NOT_RENDERED" });
             return;
         }
-
-        // Dentro del toolbar está buttonsInner__[hash]
-        const actionInner = actionToolbar.querySelector('[class*="buttonsInner__"]');
 
         if (!actionInner) {
             tpLog("MSGBUTTON", msgId, { action: "ACTION_INNER_NOT_FOUND" });
@@ -2031,19 +2047,44 @@
                         }
                     }
 
-                    // Detectar si se añadió el toolbar de acciones (buttons__) a un mensaje existente
-                    if (node.classList?.contains('buttons__') && node.getAttribute('aria-label')?.includes('Acciones')) {
-                        const msgListItem = node.closest('[data-list-item-id*="chat-messages"]');
+                    // Detección robusta (sin idioma) de aparición del toolbar de acciones:
+                    //   - CASO A: el propio nodo ES buttonsInner__ y tiene botones nativos
+                    //   - CASO B: el nodo CONTIENE buttonsInner__ y éste tiene botones nativos
+                    //   - CASO C (fallback): el nodo es buttons__ y contiene buttonsInner__
+                    var isInnerNode = node.matches?.('[class*="buttonsInner__"]');
+                    var hasInnerInside = node.querySelector?.('[class*="buttonsInner__"]');
+                    var candidateInner = isInnerNode ? node : hasInnerInside;
+                    var parentIsClassicToolbar = node.matches?.('[class*="buttons__"]') && hasInnerInside;
+                    var validForDirect = (isInnerNode && node.querySelector?.('[class*="hoverBarButton__"], [class*="button_"]')) ||
+                                         (hasInnerInside && candidateInner.querySelector?.('[class*="hoverBarButton__"], [class*="button_"]')) ||
+                                         parentIsClassicToolbar;
+                    if (validForDirect) {
+                        const msgListItem = (candidateInner || node).closest('[data-list-item-id*="chat-messages"]');
                         if (msgListItem) {
                             tpLog("MSGOBSERVER", null, { action: "ACTION_TOOLBAR_APPEARED", listItemId: msgListItem.dataset.listItemId?.substring(0, 50) });
                             processMessageNode(msgListItem);
                         }
                     }
 
-                    // También verificar si hay action toolbars dentro de nodos añadidos
-                    const actionToolbars = node.querySelectorAll?.('[aria-label*="Acciones"][role="group"]');
-                    if (actionToolbars && actionToolbars.length > 0) {
-                        actionToolbars.forEach(function(toolbar) {
+                    // También verificar si hay action toolbars / buttonsInner__ dentro de nodos añadidos (robusto, sin idioma)
+                    const innerContainers = node.querySelectorAll?.('[class*="buttonsInner__"]');
+                    if (innerContainers && innerContainers.length > 0) {
+                        innerContainers.forEach(function(innerEl) {
+                            if (!innerEl.querySelector('[class*="hoverBarButton__"], [class*="button_"]')) return;
+                            const msgListItem = innerEl.closest('[data-list-item-id*="chat-messages"]');
+                            if (msgListItem) {
+                                tpLog("MSGOBSERVER", null, { action: "ACTION_TOOLBAR_APPEARED", listItemId: msgListItem.dataset.listItemId?.substring(0, 50) });
+                                processMessageNode(msgListItem);
+                            }
+                        });
+                    }
+                    // Fallback adicional: detectar también el toolbar externo clásico (por si la
+                    // jerarquía cambiara y buttonsInner__ aún no está pintado cuando se procesa)
+                    const classicToolbars = node.querySelectorAll?.('[class*="buttons__"]');
+                    if (classicToolbars && classicToolbars.length > 0) {
+                        classicToolbars.forEach(function(toolbar) {
+                            const inner = toolbar.querySelector?.('[class*="buttonsInner__"]');
+                            if (!inner) return;
                             const msgListItem = toolbar.closest('[data-list-item-id*="chat-messages"]');
                             if (msgListItem) {
                                 tpLog("MSGOBSERVER", null, { action: "ACTION_TOOLBAR_APPEARED", listItemId: msgListItem.dataset.listItemId?.substring(0, 50) });
